@@ -13,8 +13,8 @@ def load_urls4check(path):
 
 
 def is_server_respond_with_200(url):
-    OK_status_code = 200
-    return requests.head(url).status_code == OK_status_code
+    ok_status_code = 200
+    return requests.head(url).status_code == ok_status_code
 
 
 def get_proper_domain_name_for_whois(url):
