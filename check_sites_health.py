@@ -13,7 +13,8 @@ def load_urls4check(path):
 
 
 def is_server_respond_with_200(url):
-    return requests.head(url).status_code == 200
+    OK_status_code = 200
+    return requests.head(url).status_code == OK_status_code
 
 
 def get_proper_domain_name_for_whois(url):
@@ -25,7 +26,8 @@ def get_domain_expiration_date(domain_name):
 
 
 def check_if_expires_over_month_or_more(domain_expiration_date):
-    return (((domain_expiration_date - datetime.date.today()).days) > 30)
+    month_days_quantity = 30
+    return (((domain_expiration_date - datetime.date.today()).days) > month_days_quantity)
 
 def output_sites_monitoring(urls):
     for url in urls:
