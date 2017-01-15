@@ -19,12 +19,7 @@ On launch you can pass file directly in terminal, if not scrpit asks you for it.
 ## Typical output
 
 <pre>
-http://www.google.ru
-Server responds with 200 code: True
-Server expires over month: True
---------
-http://www.vk.com
-Server responds with 200 code: False
-Server expires over month: True
---------
+http://afisha.ru: Responds with code 200: Yes | Domain is paid for over a month: Yes
+http://devman.org: Responds with code 200: Yes | Domain is paid for over a month: Yes
+http://github.com: Responds with code 200: Yes | Domain is paid for over a month: Yes
 </pre>
