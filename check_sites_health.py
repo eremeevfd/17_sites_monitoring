@@ -25,7 +25,7 @@ def load_urls4check(path):
 
 
 def is_server_respond_with_200(url):
-    return 'Yes' if requests.get(url).status_code == requests.codes.ok else 'No'
+    return requests.get(url).status_code == requests.codes.ok
 
 
 def get_proper_domain_name_for_whois(url):
@@ -38,20 +38,19 @@ def get_domain_expiration_date(domain_name):
 
 def check_if_expires_over_month_or_more(domain_expiration_date):
     month_days_quantity = 30
-    return 'Yes' if (((domain_expiration_date - datetime.datetime.today()).days) > month_days_quantity) else 'No'
+    return ((domain_expiration_date - datetime.datetime.today()).days) > month_days_quantity
 
 
 def check_sites_health(urls):
     sites_health = defaultdict(dict)
     for url in urls:
-        sites_health[url]['Response_200'] = is_server_respond_with_200(url)
-        sites_health[url]['Expires_over_month'] = \
-            check_if_expires_over_month_or_more(
+        sites_health[url]['Response_200'] = 'Yes' if is_server_respond_with_200(url) else 'No'
+        sites_health[url]['Expires_over_month'] = 'Yes' if check_if_expires_over_month_or_more(
                 get_domain_expiration_date(
                     get_proper_domain_name_for_whois(
                         url)
             )
-        )
+        ) else 'No'
     return sites_health
 
 
@@ -64,7 +63,7 @@ def output_sites_monitoring(sites_health):
 
 if __name__ == '__main__':
     parser = create_arguments_parser()
-    arguments = parser.parse_args(['urls.txt'])
+    arguments = parser.parse_args()
     urls = load_urls4check(arguments.input)
     sites_health = check_sites_health(urls)
     output_sites_monitoring(sites_health)
