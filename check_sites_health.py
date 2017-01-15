@@ -1,9 +1,21 @@
 import requests
-import whois
+import pythonwhois
 import datetime
 import os
 from urllib.parse import urlparse
-import sys
+import logging
+import argparse
+from collections import defaultdict
+
+
+logging.basicConfig(level='INFO')
+logger = logging.getLogger(__name__)
+
+
+def create_arguments_parser():
+    parser = argparse.ArgumentParser(description='Load file with urls.')
+    parser.add_argument('input', help='path to file to load')
+    return parser
 
 
 def load_urls4check(path):
@@ -13,36 +25,48 @@ def load_urls4check(path):
 
 
 def is_server_respond_with_200(url):
-    ok_status_code = 200
-    return requests.head(url).status_code == ok_status_code
+    return 'Yes' if requests.get(url).status_code == requests.codes.ok else 'No'
 
 
 def get_proper_domain_name_for_whois(url):
-    return urlparse(url).hostname[5:]
+    return urlparse(url).netloc
 
 
 def get_domain_expiration_date(domain_name):
-    return whois.whois(domain_name)['expiration_date'].date()
+    return pythonwhois.get_whois(domain_name).get('expiration_date')[0]
 
 
 def check_if_expires_over_month_or_more(domain_expiration_date):
     month_days_quantity = 30
-    return (((domain_expiration_date - datetime.date.today()).days) > month_days_quantity)
+    return 'Yes' if (((domain_expiration_date - datetime.datetime.today()).days) > month_days_quantity) else 'No'
 
-def output_sites_monitoring(urls):
+
+def check_sites_health(urls):
+    sites_health = defaultdict(dict)
     for url in urls:
-        print(url)
-        print('Server responds with 200 code:', is_server_respond_with_200(url))
-        domain_name = get_proper_domain_name_for_whois(url)
-        domain_expiration_date = get_domain_expiration_date(domain_name)
-        print('Server expires over month:', check_if_expires_over_month_or_more(domain_expiration_date))
-        print('--------')
+        sites_health[url]['Response_200'] = is_server_respond_with_200(url)
+        sites_health[url]['Expires_over_month'] = \
+            check_if_expires_over_month_or_more(
+                get_domain_expiration_date(
+                    get_proper_domain_name_for_whois(
+                        url)
+            )
+        )
+    return sites_health
+
+
+def output_sites_monitoring(sites_health):
+    for site, health in sites_health.items():
+        print('{0}: Responds with code 200: {1} | Domain is paid for over a month: {2}'.format(
+            site, health['Response_200'], health['Expires_over_month'])
+        )
+
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        urls = load_urls4check(input("Enter path to file with urls you wish to check: "))
-    else:
-        urls = load_urls4check(sys.argv[1])
-    output_sites_monitoring(urls)
+    parser = create_arguments_parser()
+    arguments = parser.parse_args(['urls.txt'])
+    urls = load_urls4check(arguments.input)
+    sites_health = check_sites_health(urls)
+    output_sites_monitoring(sites_health)
 
 
