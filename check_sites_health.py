@@ -44,20 +44,22 @@ def check_if_expires_over_month_or_more(domain_expiration_date):
 def check_sites_health(urls):
     sites_health = defaultdict(dict)
     for url in urls:
-        sites_health[url]['Response_200'] = 'Yes' if is_server_respond_with_200(url) else 'No'
-        sites_health[url]['Expires_over_month'] = 'Yes' if check_if_expires_over_month_or_more(
+        sites_health[url]['Response_200'] = is_server_respond_with_200(url)
+        sites_health[url]['Expires_over_month'] = check_if_expires_over_month_or_more(
                 get_domain_expiration_date(
                     get_proper_domain_name_for_whois(
                         url)
             )
-        ) else 'No'
+        )
     return sites_health
 
 
 def output_sites_monitoring(sites_health):
     for site, health in sites_health.items():
         print('{0}: Responds with code 200: {1} | Domain is paid for over a month: {2}'.format(
-            site, health['Response_200'], health['Expires_over_month'])
+            site,
+            'Yes' if health['Response_200'] else 'No',
+            'Yes' if health['Expires_over_month'] else 'No')
         )
 
 
